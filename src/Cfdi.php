@@ -102,7 +102,7 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
                 ]
             ]);
 
-            $this->response = $response->quick_stampResult->xml;
+            $this->response = $response->quick_stampResult;
 
             return true;
         }
