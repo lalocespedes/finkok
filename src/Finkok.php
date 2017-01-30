@@ -25,6 +25,7 @@ class Finkok
     protected $url;
     protected $username;
     protected $password;
+    protected $client_active = false;
 
     public function setCredentials($username, $password)
     {
@@ -34,110 +35,36 @@ class Finkok
 
     }
 
-    public function Timbrar($xml= null)
+    public function setClient($rfc = null)
     {
 
-        if(is_null($xml)) {
+        if(is_null($rfc)) {
 
-            $this->errors = [
-                "Falta parametro xml"
-            ]; 
-            
-            $this->valid = false;
-            return $this;
-
-        }
-        
-        if(is_null($this->username) || is_null($this->password)) {
-
-            $this->errors = [
-                "please setCredentials node"
-            ]; 
-            
-            $this->valid = false;
-            return $this;
+            throw new Exception('Falta parametro rfc cliente');
 
         }
 
-        $parse = new SimpleXMLElement($xml);
-        $ns = $parse->getNamespaces(true);
-        $parse->registerXPathNamespace("c", $ns['cfdi']);
-        $emisor = $parse->xpath("//c:Emisor");
-
-        $isClientRegister = $this->getClient($emisor[0]['rfc']);
+        $isClientRegister = $this->getClient($rfc);
 
         if(!isset($isClientRegister->users->ResellerUser->status)) {
 
-            $this->createNewClient($emisor[0]['rfc']);
+            $this->createNewClient($rfc);
 
         }
 
         if(($isClientRegister->users->ResellerUser->status == "S")) {
 
-                $this->errors = [
-                    "message" => "cuenta suspendida"
-                ];
+            $this->errors = [
+                "message" => "cuenta suspendida"
+            ];
 
-                $this->valid = false;
-                $this->response = $xml;
-                return $this;
-
+            $this->valid = false;
+            $this->response = $xml;
+            return $this;
         }
 
-        $soap = new SoapClient("{$this->url}stamp.wsdl", [
-            'trace' => 1
-        ]);
+        $this->client_active = true;
 
-        $response = $soap->__soapCall('stamp', [
-            [
-                "xml" => $xml,
-                "username" => $this->username,
-                "password" => $this->password
-            ]
-        ]);
-
-        if (!isset($response->stampResult->UUID)) {
-
-            if($response->stampResult->Incidencias->Incidencia->CodigoError) {
-
-                $this->errors = [
-                    "message" => $response->stampResult->Incidencias->Incidencia->MensajeIncidencia
-                ];
-
-                $this->valid = false;
-                $this->response = $xml;
-                return $this;
-
-            }
-
-            foreach($response->stampResult->Incidencias->Incidencia as $error) {
-
-                array_push($this->errors, $error->MensajeIncidencia);
-
-                $this->valid = false;
-                $this->response = $xml;
-                return $this;
-
-            }
-
-        }
-
-        // Check CFDI contiene un timbre previo
-        if(isset($response->stampResult->Incidencias->Incidencia->CodigoError) && $response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
-
-            $response = $soap->__soapCall('quick_stamp', [
-                [
-                    "xml" => $xml,
-                    "username" => $this->username,
-                    "password" => $this->password
-                ]
-            ]);
-
-            $this->response = $response->quick_stampResult->xml;
-
-        }
-
-        return $this;
     }
 
     public function getResponse()
@@ -149,7 +76,7 @@ class Finkok
     {
         if(is_null($rfc)) {
 
-            return "falta parametro rfc";
+            throw new Exception('Falta parametro rfc cliente');
 
         }
 
@@ -170,7 +97,7 @@ class Finkok
     {
         if(is_null($rfc)) {
 
-            return "falta parametro rfc";
+            throw new Exception('Falta parametro rfc cliente');
 
         }
 
