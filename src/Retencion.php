@@ -1,6 +1,6 @@
 <?php
 
-namespace lalocespedes\finkok;
+namespace lalocespedes\Finkok;
 
 use SoapClient;
 use SimpleXMLElement;
@@ -9,7 +9,7 @@ use Exception;
 /**
  * 
  */
-class Cfdi extends \lalocespedes\finkok\Finkok
+class Retencion extends \lalocespedes\Finkok\Finkok
 {
 
     protected $xml;
@@ -32,14 +32,24 @@ class Cfdi extends \lalocespedes\finkok\Finkok
 
             $this->errors = [
                 "please setCredentials node"
-            ];
+            ]; 
             
             $this->valid = false;
             return $this;
 
         }
 
-        $soap = new SoapClient("{$this->url}stamp.wsdl", [
+        if(!$this->client_active) {
+
+            $this->errors = [
+                "cliente no activo"
+            ]; 
+            
+            $this->valid = false;
+            return $this;
+        }
+
+        $soap = new SoapClient("{$this->url}retentions.wsdl", [
             'trace' => 1
         ]);
 
@@ -59,30 +69,17 @@ class Cfdi extends \lalocespedes\finkok\Finkok
 
         if (!isset($this->response->stampResult->UUID)) {
             
-            if($this->response->stampResult->Incidencias->Incidencia->CodigoError) {
+            $this->errors = [
+                "message" => $this->response->stampResult->Incidencias->Incidencia->MensajeIncidencia
+            ];
 
-                $this->errors = [
-                    "message" => $this->response->stampResult->Incidencias->Incidencia->MensajeIncidencia
-                ];
+            $this->valid = false;
+            $this->response = $xml;
+            return $this;
 
-                $this->valid = false;
-                $this->response = $xml;
-                return $this;
-
-            }
-
-            foreach($response->stampResult->Incidencias->Incidencia as $error) {
-
-                array_push($this->errors, $error->MensajeIncidencia);
-
-                $this->valid = false;
-                $this->response = $xml;
-                return $this;
-
-            }
         }
 
-        return $this;
+        return $this->response->stampResult->xml;
     }
 
     public function previo()
@@ -90,11 +87,11 @@ class Cfdi extends \lalocespedes\finkok\Finkok
         // Check CFDI contiene un timbre previo
         if(isset($this->response->stampResult->Incidencias->Incidencia->CodigoError) && $this->response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
 
-            $soap = new SoapClient("{$this->url}stamp.wsdl", [
+            $soap = new SoapClient("{$this->url}retentions.wsdl", [
                 'trace' => 1
             ]);
 
-            $response = $soap->__soapCall('quick_stamp', [
+            $response = $soap->__soapCall('stamped', [
                 [
                     "xml" => $this->xml,
                     "username" => $this->username,
@@ -102,7 +99,7 @@ class Cfdi extends \lalocespedes\finkok\Finkok
                 ]
             ]);
 
-            $this->response = $response->quick_stampResult->xml;
+            $this->response = $response->stampedResult->xml;
 
             return true;
         }
