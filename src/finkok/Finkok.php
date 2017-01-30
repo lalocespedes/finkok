@@ -1,6 +1,6 @@
 <?php
 
-namespace lalocespedes;
+namespace lalocespedes\finkok;
 
 use SoapClient;
 use SimpleXMLElement;
