@@ -79,7 +79,7 @@ class Retencion extends \lalocespedes\Finkok\Finkok
 
         }
 
-        return $this->response->stampResult->xml;
+        return $this;
     }
 
     public function previo()
