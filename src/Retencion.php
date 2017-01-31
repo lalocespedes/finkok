@@ -99,7 +99,7 @@ class Retencion extends \lalocespedes\Finkok\Finkok
                 ]
             ]);
 
-            $this->response = $response->stampedResult->xml;
+            $this->response = $response->stampedResult;
 
             return true;
         }
