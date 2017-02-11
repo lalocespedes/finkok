@@ -35,10 +35,10 @@ class Finkok
 
     }
 
-    public function setClient($rfc = null)
+    public function setEmisor($rfc = null)
     {
 
-        if(is_null($rfc)) {
+        if(is_null($rfc) || empty($rfc)) {
 
             throw new Exception('Falta parametro rfc cliente');
 
@@ -220,5 +220,4 @@ class Finkok
     {
         return $this->errors;
     }
-
 }

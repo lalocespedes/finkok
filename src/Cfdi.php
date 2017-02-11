@@ -11,8 +11,13 @@ use Exception;
  */
 class Cfdi extends \lalocespedes\Finkok\Finkok
 {
-
     protected $xml;
+    protected $valid = false;
+    protected $errors = [];
+
+    public function __construct () {
+        
+    }
 
     public function Timbrar($xml = null)
     {
@@ -24,8 +29,7 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
                 "Falta parametro xml"
             ]; 
             
-            $this->valid = false;
-            return false;
+            return $this;
         }
 
         if(is_null($this->username) || is_null($this->password)) {
@@ -34,9 +38,7 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
                 "please setCredentials node"
             ];
             
-            $this->valid = false;
             return $this;
-
         }
 
         $soap = new SoapClient("{$this->url}stamp.wsdl", [
@@ -57,31 +59,19 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
 
         }
 
-        if (!isset($this->response->stampResult->UUID)) {
-            
-            if($this->response->stampResult->Incidencias->Incidencia->CodigoError) {
+        if (isset($this->response->stampResult->Incidencias)) {
 
-                $this->errors = [
-                    "message" => $this->response->stampResult->Incidencias->Incidencia->MensajeIncidencia
-                ];
-
-                $this->valid = false;
-                $this->response = $xml;
-                return $this;
-
-            }
-
-            foreach($response->stampResult->Incidencias->Incidencia as $error) {
+            foreach($this->response->stampResult->Incidencias->Incidencia as $error) {
 
                 array_push($this->errors, $error->MensajeIncidencia);
 
-                $this->valid = false;
-                $this->response = $xml;
-                return $this;
-
             }
-        }
 
+            $this->response = $xml;
+            return $this;
+        }
+        
+        $this->valid = true;
         return $this;
     }
 
@@ -104,6 +94,7 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
 
             $this->response = $response->quick_stampResult;
 
+            $this->valid = true;
             return true;
         }
 
