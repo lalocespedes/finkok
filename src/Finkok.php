@@ -90,6 +90,12 @@ class Finkok
                 ]
         ]);
 
+        if($response->getResult->message == "Cuenta Suspendida") {
+
+            throw new Exception('Cuenta PAC Suspendida');
+
+        }
+
         return $response->getResult;
     }
 
