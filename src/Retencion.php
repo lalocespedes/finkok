@@ -66,11 +66,12 @@ class Retencion extends \lalocespedes\Finkok\Finkok
             }
 
             $this->response = $response->stampResult;
-        
-            $this->valid = true;
             return $this;
         }
 
+        $this->response = $response->stampResult;
+
+        $this->valid = true;
         return $this;
     }
 
