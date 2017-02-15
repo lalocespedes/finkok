@@ -11,8 +11,9 @@ use Exception;
  */
 class Retencion extends \lalocespedes\Finkok\Finkok
 {
-
     protected $xml;
+    protected $valid = false;
+    protected $errors = [];
 
     public function Timbrar($xml = null)
     {
@@ -24,8 +25,7 @@ class Retencion extends \lalocespedes\Finkok\Finkok
                 "Falta parametro xml"
             ]; 
             
-            $this->valid = false;
-            return false;
+            return $this;
         }
 
         if(is_null($this->username) || is_null($this->password)) {
@@ -34,18 +34,6 @@ class Retencion extends \lalocespedes\Finkok\Finkok
                 "please setCredentials node"
             ]; 
             
-            $this->valid = false;
-            return $this;
-
-        }
-
-        if(!$this->client_active) {
-
-            $this->errors = [
-                "cliente no activo"
-            ]; 
-            
-            $this->valid = false;
             return $this;
         }
 
@@ -53,7 +41,7 @@ class Retencion extends \lalocespedes\Finkok\Finkok
             'trace' => 1
         ]);
 
-        $this->response = $soap->__soapCall('stamp', [
+        $response = $soap->__soapCall('stamp', [
             [
                 "xml" => $xml,
                 "username" => $this->username,
@@ -61,22 +49,26 @@ class Retencion extends \lalocespedes\Finkok\Finkok
             ]
         ]);
 
-        if($this->previo()) {
+        // Check CFDI contiene un timbre previo
+        if(isset($response->stampResult->Incidencias->Incidencia->CodigoError) && $response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
 
-            return $this->response;
+            $this->previo();
+            return $this;
 
         }
 
-        if (!isset($this->response->stampResult->UUID)) {
+        if (isset($response->stampResult->Incidencias)) {
             
-            $this->errors = [
-                "message" => $this->response->stampResult->Incidencias->Incidencia->MensajeIncidencia
-            ];
+            foreach($response->stampResult->Incidencias->Incidencia as $error) {
 
-            $this->valid = false;
-            $this->response = $xml;
+                array_push($this->errors, $error->MensajeIncidencia);
+
+            }
+
+            $this->response = $response->stampResult;
+        
+            $this->valid = true;
             return $this;
-
         }
 
         return $this;
@@ -84,26 +76,18 @@ class Retencion extends \lalocespedes\Finkok\Finkok
 
     public function previo()
     {
-        // Check CFDI contiene un timbre previo
-        if(isset($this->response->stampResult->Incidencias->Incidencia->CodigoError) && $this->response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
+        $soap = new SoapClient("{$this->url}stamp.wsdl", [
+            'trace' => 1
+        ]);
 
-            $soap = new SoapClient("{$this->url}retentions.wsdl", [
-                'trace' => 1
-            ]);
+        $response = $soap->__soapCall('quick_stamp', [
+            [
+                "xml" => $this->xml,
+                "username" => $this->username,
+                "password" => $this->password
+            ]
+        ]);
 
-            $response = $soap->__soapCall('stamped', [
-                [
-                    "xml" => $this->xml,
-                    "username" => $this->username,
-                    "password" => $this->password
-                ]
-            ]);
-
-            $this->response = $response->stampedResult;
-
-            return true;
-        }
-
-        return false;
+        return $this->response = $response->quick_stampResult;
     }
 }

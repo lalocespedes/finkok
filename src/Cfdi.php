@@ -15,10 +15,6 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
     protected $valid = false;
     protected $errors = [];
 
-    public function __construct () {
-        
-    }
-
     public function Timbrar($xml = null)
     {
         $this->xml = $xml;
@@ -45,7 +41,7 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
             'trace' => 1
         ]);
 
-        $this->response = $soap->__soapCall('stamp', [
+        $response = $soap->__soapCall('stamp', [
             [
                 "xml" => $xml,
                 "username" => $this->username,
@@ -53,15 +49,17 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
             ]
         ]);
 
-        if($this->previo()) {
+        // Check CFDI contiene un timbre previo
+        if(isset($response->stampResult->Incidencias->Incidencia->CodigoError) && $response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
 
-            return $this->response;
+            $this->previo();
+            return $this;
 
         }
 
-        if (isset($this->response->stampResult->Incidencias)) {
+        if (isset($response->stampResult->Incidencias)) {
 
-            foreach($this->response->stampResult->Incidencias->Incidencia as $error) {
+            foreach($response->stampResult->Incidencias->Incidencia as $error) {
 
                 array_push($this->errors, $error->MensajeIncidencia);
 
@@ -71,33 +69,26 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
             return $this;
         }
         
+        $this->response = $response->stampResult;
+        
         $this->valid = true;
         return $this;
     }
 
     public function previo()
     {
-        // Check CFDI contiene un timbre previo
-        if(isset($this->response->stampResult->Incidencias->Incidencia->CodigoError) && $this->response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
+        $soap = new SoapClient("{$this->url}stamp.wsdl", [
+            'trace' => 1
+        ]);
 
-            $soap = new SoapClient("{$this->url}stamp.wsdl", [
-                'trace' => 1
-            ]);
+        $response = $soap->__soapCall('quick_stamp', [
+            [
+                "xml" => $this->xml,
+                "username" => $this->username,
+                "password" => $this->password
+            ]
+        ]);
 
-            $response = $soap->__soapCall('quick_stamp', [
-                [
-                    "xml" => $this->xml,
-                    "username" => $this->username,
-                    "password" => $this->password
-                ]
-            ]);
-
-            $this->response = $response->quick_stampResult;
-
-            $this->valid = true;
-            return true;
-        }
-
-        return false;
+        return $this->response = $response->quick_stampResult;
     }
 }

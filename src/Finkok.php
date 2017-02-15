@@ -90,9 +90,9 @@ class Finkok
                 ]
         ]);
 
-        if($response->getResult->message == "Cuenta Suspendida") {
+        if(property_exists($response->getResult, 'message') && $response->getResult->message == "Cuenta Suspendida") {
 
-            throw new Exception('Cuenta PAC Suspendida');
+            throw new Exception('Cuenta Suspendida');
 
         }
 
