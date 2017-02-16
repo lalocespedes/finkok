@@ -50,7 +50,8 @@ class Finkok
         if(property_exists($isClientRegister, 'users') && !count(get_object_vars($isClientRegister->users))) {
 
             $this->createNewClient($rfc);
-
+            $this->client_active = true;
+            return $this;
         }
 
         if(($isClientRegister->users->ResellerUser->status == "S")) {
@@ -65,7 +66,6 @@ class Finkok
         }
 
         $this->client_active = true;
-
     }
 
     public function getResponse()
