@@ -9,7 +9,7 @@ use Exception;
 /**
  * 
  */
-class Cfdi extends \lalocespedes\Finkok\Finkok
+class Retencion extends \lalocespedes\Finkok\Finkok
 {
     protected $xml;
     protected $valid = false;
