@@ -47,7 +47,7 @@ class Finkok
 
         $isClientRegister = $this->getClient($rfc);
 
-        if(!isset($isClientRegister->users->ResellerUser->status)) {
+        if(property_exists($isClientRegister, 'users') && !count(get_object_vars($isClientRegister->users))) {
 
             $this->createNewClient($rfc);
 
