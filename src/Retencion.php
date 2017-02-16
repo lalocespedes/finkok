@@ -9,10 +9,11 @@ use Exception;
 /**
  * 
  */
-class Retencion extends \lalocespedes\Finkok\Finkok
+class Cfdi extends \lalocespedes\Finkok\Finkok
 {
     protected $xml;
     protected $valid = false;
+    protected $previamente_timbrado = false;
     protected $errors = [];
 
     public function Timbrar($xml = null)
@@ -32,7 +33,7 @@ class Retencion extends \lalocespedes\Finkok\Finkok
 
             $this->errors = [
                 "please setCredentials node"
-            ]; 
+            ];
             
             return $this;
         }
@@ -50,45 +51,37 @@ class Retencion extends \lalocespedes\Finkok\Finkok
         ]);
 
         // Check CFDI contiene un timbre previo
-        if(isset($response->stampResult->Incidencias->Incidencia->CodigoError) && $response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
-
-            $this->previo();
-            return $this;
-
-        }
-
-        if (isset($response->stampResult->Incidencias)) {
-            
-            foreach($response->stampResult->Incidencias->Incidencia as $error) {
-
-                array_push($this->errors, $error->MensajeIncidencia);
-
-            }
+        if(property_exists($response->stampResult->Incidencias, 'Incidencia') && $response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
 
             $this->response = $response->stampResult;
+            $this->previamente_timbrado = true;
+            $this->valid = true;            
             return $this;
+
         }
 
-        $this->response = $response->stampResult;
+        if (property_exists($response->stampResult->Incidencias, 'Incidencia') && !empty($response->stampResult->Incidencias)) {
 
+            if(is_array($response->stampResult->Incidencias)) {
+
+                foreach($response->stampResult->Incidencias->Incidencia->MensajeIncidencia as $error) {
+
+                    array_push($this->errors, $error->MensajeIncidencia);
+
+                }
+            } else {
+
+                array_push($this->errors, $response->stampResult->Incidencias->Incidencia->MensajeIncidencia);
+            }
+
+            $this->response = $xml;
+            return $this;
+        }
+        
+        $this->response = $response->stampResult;
+        
         $this->valid = true;
         return $this;
-    }
 
-    public function previo()
-    {
-        $soap = new SoapClient("{$this->url}stamp.wsdl", [
-            'trace' => 1
-        ]);
-
-        $response = $soap->__soapCall('quick_stamp', [
-            [
-                "xml" => $this->xml,
-                "username" => $this->username,
-                "password" => $this->password
-            ]
-        ]);
-
-        return $this->response = $response->quick_stampResult;
     }
 }

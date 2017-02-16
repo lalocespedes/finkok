@@ -26,6 +26,7 @@ class Finkok
     protected $username;
     protected $password;
     protected $client_active = false;
+    protected $previamente_timbrado = false;
 
     public function setCredentials($username, $password)
     {
@@ -225,5 +226,10 @@ class Finkok
     public function errors()
     {
         return $this->errors;
+    }
+
+    public function previamente_timbrado()
+    {
+        return $this->previamente_timbrado;
     }
 }
