@@ -53,9 +53,22 @@ class Retencion extends \lalocespedes\Finkok\Finkok
         // Check CFDI contiene un timbre previo
         if(property_exists($response->stampResult->Incidencias, 'Incidencia') && $response->stampResult->Incidencias->Incidencia->CodigoError == 307) {
 
-            $this->response = $response->stampResult;
+            // Get previous cfdi
+
+            $soap = new SoapClient("{$this->url}retentions.wsdl", [
+                'trace' => 1
+            ]);
+            $response = $soap->__soapCall('stamped', [
+                [
+                    "xml" => $this->xml,
+                    "username" => $this->username,
+                    "password" => $this->password
+                ]
+            ]);
+
+            $this->response = $response->stampedResult;
             $this->previamente_timbrado = true;
-            $this->valid = true;            
+            $this->valid = true;
             return $this;
 
         }
