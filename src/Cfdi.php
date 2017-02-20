@@ -71,7 +71,9 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
                 }
             } else {
 
-                array_push($this->errors, $response->stampResult->Incidencias->Incidencia->MensajeIncidencia);
+                $this->errors = [
+                    "message" => "Respuesta PAC " . $response->stampResult->Incidencias->Incidencia->MensajeIncidencia
+                ];            
             }
 
             $this->response = $xml;
