@@ -86,7 +86,7 @@ class Retencion extends \lalocespedes\Finkok\Finkok
 
                 $this->errors = [
                     "message" => "Respuesta PAC " . $response->stampResult->Incidencias->Incidencia->MensajeIncidencia
-                ];            
+                ];
             }
 
             $this->response = $xml;
