@@ -32,7 +32,7 @@ class Finkok
     {
         $this->username = $username;
         $this->password = $password;
-        $this->url = "http://demo-facturacion.finkok.com/servicios/soap/";
+        $this->url = getenv('FINKOK_URL_TIMBRADO');
 
     }
 
@@ -125,58 +125,6 @@ class Finkok
         }
 
         return false;
-    }
-
-    public function Cancelar(array $uuids, $rfc)
-    {
-        if(is_null($this->username) || is_null($this->password)) {
-
-            $this->errors = [
-                "please setCredentials node"
-            ]; 
-            
-            $this->valid = false;
-            return $this;
-
-        }
-
-        if(is_null($xml)) {
-
-            $this->errors = [
-                "Falta parametro xml"
-            ]; 
-            
-            $this->valid = false;
-            return $this;
-
-        }
-
-        $soap = new SoapClient("{$this->url}cancel.wsdl", [
-            'trace' => 1
-            ]);
-
-        $response = $soap->__soapCall("cancel", [
-            [
-                "UUIDS" => [
-                    'uuids' => $uuids
-                ],
-                "username" => $this->username,
-                "password" => $this->password,
-                "taxpayer_id" => $rfc,
-                "cer" => $csd->getCerPem(),
-                "key" => $csd->getKeyPem()
-            ]
-        ]);
-
-        if(isset($response->cancelResult->Acuse)) {
-
-            $file = new XmlSave();
-            $file->save($UUID.'-cancel.xml', $response->cancelResult->Acuse);
-
-            return $response->cancelResult->CodEstatus;
-        }
-        
-
     }
 
     public function Recuperar(string $uuid= null, $rfc)

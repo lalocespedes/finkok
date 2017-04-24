@@ -86,4 +86,30 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
         return $this;
 
     }
+
+    public function Cancelar(array $uuids, $rfc, $cerpem, $keypem)
+    {
+        $soap = new SoapClient("{$this->url}cancel.wsdl", ['trace' => 1]);
+
+        $response = $soap->__soapCall("cancel", [
+            [
+                "UUIDS" => [
+                    'uuids' => $uuids
+                ],
+                "username" => getenv('FINKOK_USER'),
+                "password" => getenv('FINKOK_PASSWORD'),
+                "taxpayer_id" => $rfc,
+                "cer" => $cerpem,
+                "key" => $keypem
+            ]
+        ]);
+
+        if(isset($response->cancelResult->Acuse)) {
+
+            return $response->cancelResult->Acuse;
+        }
+
+        return false;
+    }
+
 }
