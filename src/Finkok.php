@@ -14,12 +14,12 @@ class Finkok
     /**
     * @var array
     */
-    protected $errors = [];
+    public $errors = [];
 
     /**
     * @var bool
     */
-    protected $valid = true;
+    public $valid = true;
 
     protected $response;
     protected $url;

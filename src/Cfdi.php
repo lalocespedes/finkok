@@ -12,9 +12,7 @@ use Exception;
 class Cfdi extends \lalocespedes\Finkok\Finkok
 {
     protected $xml;
-    protected $valid = false;
     protected $previamente_timbrado = false;
-    protected $errors = [];
 
     public function Timbrar($xml = null)
     {
