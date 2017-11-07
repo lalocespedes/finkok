@@ -104,15 +104,11 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
     public function Recuperar(string $uuid, string $rfc)
     {
         if (is_null($this->username) || is_null($this->password)) {
-            $this->errors = ["please setCredentials node"];
-            $this->valid = false;
-            return $this;
+            throw new Exception("please setCredentials node");
         }
 
         if (is_null($uuid)) {
-            $this->errors = ["Falta parametro uuid"];
-            $this->valid = false;
-            return $this;
+            throw new Exception("Falta parametro uuid");
         }
 
         $soap = new SoapClient("{$this->url}utilities.wsdl", ['trace' => 1]);
@@ -123,6 +119,12 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
             "password" => $this->password,
             "taxpayer_id" => $rfc
         ]]);
+
+        if($response->get_xmlResult->error) {
+            $this->errors = [$response->get_xmlResult->error];
+            $this->valid = false;
+            return $this;
+        }
 
         return $response->get_xmlResult->xml;
     }
