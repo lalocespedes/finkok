@@ -101,7 +101,7 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
         return false;
     }
 
-    static function Recuperar(string $uuid, string $rfc)
+    public function Recuperar(string $uuid, string $rfc)
     {
         if (is_null($this->username) || is_null($this->password)) {
             $this->errors = ["please setCredentials node"];
