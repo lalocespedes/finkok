@@ -7,7 +7,7 @@ use SimpleXMLElement;
 use Exception;
 
 /**
- * 
+ *
  */
 class Finkok
 {
@@ -27,6 +27,12 @@ class Finkok
     protected $password;
     protected $client_active = false;
     protected $previamente_timbrado = false;
+
+    function __construct() {
+        $this->username = getenv('FINKOK_USERNAME');
+        $this->password = getenv('FINKOK_PASSWORD');
+        $this->url = getenv('FINKOK_URL_TIMBRADO');
+    }
 
     public function setCredentials($username, $password)
     {
@@ -125,45 +131,6 @@ class Finkok
         }
 
         return false;
-    }
-
-    public function Recuperar(string $uuid= null, $rfc)
-    {
-        if(is_null($this->username) || is_null($this->password)) {
-
-            $this->errors = [
-                "please setCredentials node"
-            ]; 
-            
-            $this->valid = false;
-            return $this;
-
-        }
-
-        if(is_null($uuid)) {
-
-            $this->errors = [
-                "Falta parametro uuid"
-            ]; 
-            
-            $this->valid = false;
-            return $this;
-
-        }
-
-        $soap = new SoapClient("{$this->url}utilities.wsdl", [
-            'trace' => 1
-            ]);
-
-        $response = $soap->__soapCall("get_xml", [
-            "uuid" => $uuid,
-            "username" => $this->username,
-            "password" => $this->password,
-            "taxpayer_id" => $rfc
-        ]);
-
-        return $response->get_xmlResult->xml;
-        
     }
 
     public function failed()
