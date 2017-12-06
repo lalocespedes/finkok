@@ -92,11 +92,7 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
             ]
         ]);
 
-        if (isset($response->cancelResult->Acuse)) {
-            return $response->cancelResult->Acuse;
-        }
-
-        return false;
+        return $response;
     }
 
     public function Recuperar(string $uuid, string $rfc)
