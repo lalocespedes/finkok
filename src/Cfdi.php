@@ -84,8 +84,8 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
                 "UUIDS" => [
                     'uuids' => $uuids
                 ],
-                "username" => getenv('FINKOK_USER'),
-                "password" => getenv('FINKOK_PASSWORD'),
+                "username" => $this->username,
+                "password" => $this->password,
                 "taxpayer_id" => $rfc,
                 "cer" => $cerpem,
                 "key" => $keypem
