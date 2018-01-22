@@ -114,11 +114,11 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
             "taxpayer_id" => $rfc
         ]]);
 
-        if($response->get_xmlResult->error) {
-            $this->errors = [$response->get_xmlResult->error];
-            $this->valid = false;
-            return $this;
-        }
+        // if($response->get_xmlResult->error) {
+        //     $this->errors = [$response->get_xmlResult->error];
+        //     $this->valid = false;
+        //     return $this;
+        // }
 
         return $response->get_xmlResult->xml;
     }
