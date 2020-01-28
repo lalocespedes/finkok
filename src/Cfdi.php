@@ -77,9 +77,9 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
 
     public function Cancelar(array $uuids, $rfc, $cerpem, $keypem)
     {
-        $soap = new SoapClient("{$this->url}cancel.wsdl", ['trace' => 1]);
+        $client = new SoapClient("{$this->url}cancel.wsdl", ['trace' => 1]);
 
-        $response = $soap->__soapCall("cancel", [
+        $response = $client->__soapCall("cancel", [
             [
                 "UUIDS" => [
                     'uuids' => $uuids
@@ -92,7 +92,20 @@ class Cfdi extends \lalocespedes\Finkok\Finkok
             ]
         ]);
 
-        return $response;
+        $Soaprequest = $client->__getLastRequest();
+        $Soapresponse = $client->__getLastResponse();
+
+        if(property_exists($response->cancelResult, 'Folios')) {
+            if ($response->cancelResult->Folios->Folio->EstatusUUID == '201' || $response->cancelResult->Folios->Folio->EstatusUUID == '202') {
+                return $response;
+            }
+        }
+
+        return [
+            'response' => $response,
+            "SoapRequest" => $Soaprequest,
+            "SoapResponse" => $Soapresponse
+        ];
     }
 
     public function Recuperar(string $uuid, string $rfc)
