@@ -7,14 +7,14 @@ use SimpleXMLElement;
 use Exception;
 
 /**
- * 
+ *
  */
 class Retencion extends \lalocespedes\Finkok\Finkok
 {
-    protected $xml;
-    protected $valid = false;
-    protected $previamente_timbrado = false;
-    protected $errors = [];
+    public $xml;
+    public $valid = false;
+    public $previamente_timbrado = false;
+    public $errors = [];
 
     public function Timbrar($xml = null)
     {
@@ -24,8 +24,8 @@ class Retencion extends \lalocespedes\Finkok\Finkok
 
             $this->errors = [
                 "Falta parametro xml"
-            ]; 
-            
+            ];
+
             return $this;
         }
 
@@ -34,7 +34,7 @@ class Retencion extends \lalocespedes\Finkok\Finkok
             $this->errors = [
                 "please setCredentials node"
             ];
-            
+
             return $this;
         }
 
@@ -92,9 +92,9 @@ class Retencion extends \lalocespedes\Finkok\Finkok
             $this->response = $xml;
             return $this;
         }
-        
+
         $this->response = $response->stampResult;
-        
+
         $this->valid = true;
         return $this;
 
